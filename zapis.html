@@ -521,6 +521,19 @@ body{
     show(5);
   }
 
+  /* ——— авто-высота: сообщаем родительской странице реальную высоту формы,
+     чтобы окно iframe подстраивалось под содержимое и не оставляло пустоты ——— */
+  function reportHeight() {
+    var h = document.body ? document.body.scrollHeight : 0;
+    if (h) { try { parent.postMessage({ __planerka: true, height: h }, "*"); } catch (e) {} }
+  }
+  if (window.ResizeObserver) {
+    try { new ResizeObserver(reportHeight).observe(document.body); } catch (e) {}
+  }
+  window.addEventListener("load", reportHeight);
+  setTimeout(reportHeight, 400);
+  reportHeight();
+
 })();
 </script>
 </body>

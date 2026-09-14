@@ -91,7 +91,7 @@
         </div>
         <div class="booking-col">
       <div class="booking-embed">
-        <iframe src="zapis.html" title="Форма записи на сессию" loading="lazy" class="planerka-frame" style="min-height:580px"></iframe>
+        <iframe src="zapis.html" title="Форма записи на сессию" loading="lazy" class="planerka-frame" style="height:340px;min-height:0" scrolling="no"></iframe>
         <p class="booking-fallback">Не открылся календарь? <a href="https://planerka.app/psyhologburanova/120min" target="_blank" rel="noopener" class="lnk">Открыть запись в новом окне →</a></p>
       </div></div>
       </div>
@@ -144,6 +144,16 @@
     </div>
   </footer>
 </div>
+<script>
+// Подгоняем высоту окна записи под содержимое формы (сообщения шлёт zapis.html)
+window.addEventListener("message", function (e) {
+  var d = e.data;
+  if (d && d.__planerka && typeof d.height === "number") {
+    var f = document.querySelector(".planerka-frame");
+    if (f) f.style.height = (d.height + 2) + "px";
+  }
+});
+</script>
 <script src="app.js" defer></script>
 </body>
 </html>
