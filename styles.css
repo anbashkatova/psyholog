@@ -136,7 +136,7 @@ a.lnk:hover{color:var(--accent-hover);text-decoration:underline}
 
 /* мобильная шапка: слева две строки (имя / меню), кнопка — справа по центру между ними */
 @media (max-width:640px){
-  .bar{position:relative;padding:2px 124px 2px 14px;gap:0 10px;line-height:1.05}
+  .bar{position:relative;padding:2px 124px 2px 14px;gap:3px 10px;line-height:1.05}
   .brand{flex-basis:100%;margin-right:0;line-height:1.1;text-align:left}
   .nav{flex-basis:100%;flex-wrap:nowrap;gap:8px;font-size:13px;line-height:1.1;justify-content:flex-start;align-items:center}
   .nav-lnk{white-space:nowrap}
