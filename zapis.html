@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Запись на сессию</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=Lora:wght@500&family=Manrope:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f7f4ef; --card:#fff;
+  --ink:oklch(0.3 0.02 250); --ink-strong:oklch(0.27 0.025 252);
+  --muted:oklch(0.5 0.02 250); --muted2:oklch(0.42 0.02 250);
+  --line:oklch(0.89 0.015 250); --line-soft:oklch(0.93 0.01 250);
+  --accent:oklch(0.55 0.09 235); --accent-hover:oklch(0.48 0.1 235);
+  --accent-soft:oklch(0.96 0.02 235); --sand:oklch(0.95 0.028 75);
+  --bad:oklch(0.55 0.14 25);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{
+  font-family:Manrope,system-ui,sans-serif;font-size:16px;line-height:1.5;
+  color:var(--ink);background:transparent;
+  -webkit-font-smoothing:antialiased;padding:2px;
+}
+.app{width:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+.say{font-family:Lora,Georgia,serif;font-size:19px;line-height:1.35;color:var(--ink-strong);min-height:26px;text-wrap:pretty}
+.say b{font-weight:500;color:var(--accent-ink,var(--accent))}
+
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:20px;display:flex;flex-direction:column;gap:16px;
+}
+.card.shake{animation:shake .45s ease-in-out}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}45%{transform:translateX(6px)}70%{transform:translateX(-3px)}}
+
+.dots{display:flex;gap:7px;justify-content:center}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .25s,transform .25s}
+.dots i.on{background:var(--accent);transform:scale(1.25)}
+
+.screen{display:none;flex-direction:column;gap:12px}
+.screen.on{display:flex;animation:fade .3s ease-out}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}}
+
+#types{display:flex;flex-direction:column;gap:10px}
+.pick{
+  font:inherit;text-align:left;cursor:pointer;color:var(--ink);
+  border:1px solid var(--line);border-radius:12px;background:var(--card);
+  padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  transition:border-color .15s,background .15s;
+}
+.pick:hover{border-color:var(--accent);background:var(--accent-soft)}
+.pick b{font-family:Lora,Georgia,serif;font-weight:500;font-size:17px;color:var(--ink-strong)}
+.pick small{display:block;font-weight:400;font-size:13px;color:var(--muted);margin-top:3px}
+.pick em{font-style:normal;font-size:13px;color:var(--muted);flex:none}
+
+.ribbon{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scroll-snap-type:x mandatory}
+.ribbon::-webkit-scrollbar{height:6px}
+.ribbon::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+.day{
+  flex:none;width:60px;scroll-snap-align:start;cursor:pointer;font:inherit;color:var(--ink);
+  border:1px solid var(--line);border-radius:12px;background:var(--card);
+  padding:9px 0;display:flex;flex-direction:column;align-items:center;gap:1px;
+  transition:border-color .15s,background .15s,color .15s;
+}
+.day:hover{border-color:var(--accent)}
+.day.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.day.off{opacity:.38;pointer-events:none}
+.day .wd{font-size:11px;font-weight:500;text-transform:lowercase;color:var(--muted)}
+.day.on .wd,.day.on .mo{color:oklch(0.92 0.02 235)}
+.day .n{font-size:19px;font-weight:600;line-height:1.15}
+.day .mo{font-size:11px;font-weight:500;color:var(--muted)}
+
+.times{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.time{
+  font:inherit;font-weight:500;cursor:pointer;color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;background:var(--card);
+  padding:12px 4px;transition:border-color .15s,background .15s;
+}
+.time:hover{border-color:var(--accent);background:var(--accent-soft)}
+
+.f{display:flex;flex-direction:column;gap:6px}
+.f span{font-size:13px;font-weight:500;color:var(--muted)}
+.f input{
+  font:inherit;font-size:16px;padding:12px 14px;color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;background:var(--card);
+}
+.f input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.trap{position:absolute;left:-9999px;width:1px;height:1px}
+
+.go{
+  font:inherit;font-weight:600;font-size:16px;cursor:pointer;color:#fff;
+  padding:14px;border:0;border-radius:999px;background:var(--accent);
+  transition:background .15s;margin-top:4px;
+}
+.go:hover{background:var(--accent-hover)}
+.go:disabled{opacity:.6;cursor:default}
+
+.note{font-size:13px;color:var(--muted);text-align:center}
+.back{
+  font:inherit;font-size:14px;color:var(--muted);
+  background:none;border:0;cursor:pointer;align-self:flex-start;padding:2px 0;
+}
+.back:hover{color:var(--accent)}
+
+/* скелетоны загрузки */
+.pending{min-height:var(--sk-h,90px)}
+.skrow{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px dashed var(--line);border-radius:12px;margin-bottom:10px}
+.skchip{height:46px;border:1px dashed var(--line);border-radius:10px}
+.bars{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
+.bar{height:11px;border-radius:6px}
+.bar.short{width:46%}
+.sw{background-image:linear-gradient(100deg,var(--line-soft) 34%,#fbf8f3 50%,var(--line-soft) 66%);background-size:220% 100%;animation:sweep 1.5s linear infinite}
+@keyframes sweep{from{background-position:120% 0}to{background-position:-120% 0}}
+.badtext{color:var(--bad);font-weight:500}
+
+.recap{display:flex;flex-direction:column}
+.ticketline{display:flex;justify-content:space-between;gap:10px;font-size:15px;padding:11px 0;border-bottom:1px solid var(--line-soft)}
+.ticketline:last-child{border-bottom:0}
+.ticketline span{color:var(--muted)}
+.ticketline b{font-weight:600;text-align:right}
+
+.foot{text-align:center;font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.foot a{color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- data-api-key — ключ Планёрки со скоупом «публичный для сайта» -->
+<div class="app" id="app"
+     data-api-key="cal_50d48aa4deb960769089e416a4c170c928704e1e551f3910529c34ec94dd8556">
+
+  <p class="say" id="say">Секунду, смотрю свободное время…</p>
+
+  <div class="card">
+    <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+
+    <!-- 1 — услуга -->
+    <section class="screen on" data-s="1">
+      <div id="types"></div>
+    </section>
+
+    <!-- 2 — дата -->
+    <section class="screen" data-s="2">
+      <button class="back" type="button" data-to="1">← другая встреча</button>
+      <div class="ribbon" id="ribbon"></div>
+    </section>
+
+    <!-- 3 — время -->
+    <section class="screen" data-s="3">
+      <button class="back" type="button" data-to="2">← другой день</button>
+      <div class="times" id="times"></div>
+    </section>
+
+    <!-- 4 — контакты -->
+    <section class="screen" data-s="4">
+      <button class="back" type="button" data-to="3">← другое время</button>
+      <label class="f"><span>Как вас зовут</span>
+        <input name="name" autocomplete="name" placeholder="Имя"></label>
+      <label class="f"><span>Куда прислать подтверждение</span>
+        <input name="email" type="email" autocomplete="email" placeholder="you@mail.ru"></label>
+      <label class="f"><span>Телефон — если хотите</span>
+        <input name="phone" autocomplete="tel" placeholder="+7"></label>
+      <input class="trap" name="trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="go" type="button" id="go">Записаться</button>
+      <p class="note" id="fine">Письмо со ссылкой на встречу придёт сразу после записи.</p>
+    </section>
+
+    <!-- 5 — готово -->
+    <section class="screen" data-s="5">
+      <div class="recap" id="recap"></div>
+      <button class="back" type="button" data-to="1" style="align-self:center;margin-top:6px">записаться ещё раз</button>
+    </section>
+  </div>
+
+  <p class="foot">Записи ведёт <a href="https://planerka.app" target="_blank" rel="noopener">Планёрка</a></p>
+</div>
+
+<script>
+(function () {
+  var root = document.getElementById("app");
+  var KEY  = root.getAttribute("data-api-key");
+  var API  = "https://planerka.app";
+  var V_TYPES = "2024-08-13", V_SLOTS = "2024-09-04", V_BOOK = "2024-08-13";
+
+  var TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Moscow";
+  var HORIZON = 20;
+
+  var MOF = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+  var MO  = ["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
+  var WD  = ["вс","пн","вт","ср","чт","пт","сб"];
+
+  var q  = function (s) { return document.getElementById(s); };
+  var st = { type: null, date: null, slot: null, screen: 1, byDate: {}, single: false };
+
+  /* ——— запрос к API Планёрки ———
+     Ключ идёт прямо из браузера. Скоуп «публичный для сайта» (чтение типов
+     встреч и слотов, создание брони) и список разрешённых origin'ов на стороне
+     Планёрки делают это безопасным. */
+  function api(path, version, opts) {
+    opts = opts || {};
+    opts.headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + KEY,
+      "cal-api-version": version
+    };
+    return fetch(API + path, opts).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (body) {
+        if (!r.ok) {
+          var err = new Error((body.error && body.error.message) || ("HTTP " + r.status));
+          err.httpStatus = r.status;
+          throw err;
+        }
+        return body;
+      });
+    });
+  }
+
+  /* ——— подсказка над карточкой (заменяет реплики кота) ——— */
+  function speak(html) { q("say").innerHTML = html; }
+
+  /* ——— визуальная реакция на ошибку (заменяет тряску кота) ——— */
+  function oops(el) {
+    var c = document.querySelector(".card");
+    c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
+    if (el && el.focus) { try { el.focus(); } catch (e) {} }
+  }
+  function lookAway() {}   /* оставлено пустым — раньше отворачивался кот */
+
+  /* ——— экраны и точки-шаги ——— */
+  function show(n) {
+    st.screen = n;
+    [].forEach.call(document.querySelectorAll(".screen"), function (s) {
+      s.classList.toggle("on", Number(s.getAttribute("data-s")) === n);
+    });
+    [].forEach.call(q("dots").children, function (el, i) {
+      el.classList.toggle("on", i < Math.min(n, 4));
+    });
+    q("dots").style.visibility = n === 5 ? "hidden" : "visible";
+  }
+  [].forEach.call(document.querySelectorAll(".back"), function (b) {
+    b.onclick = function () {
+      var to = Number(b.getAttribute("data-to"));
+      if (to === 1 && st.single) { reset(); speak("Загружаю свободное время…"); pickType(st.type); return; }
+      if (to === 1) { st.type = null; reset(); speak("На что записываемся?"); }
+      if (to === 2) speak("Когда вам удобно?");
+      if (to === 3) speak("Выберите время.");
+      show(to);
+    };
+  });
+  function reset() {
+    st.date = null; st.slot = null;
+    [].forEach.call(document.querySelectorAll("input"), function (i) { i.value = ""; });
+  }
+
+  /* ——— мелочи ——— */
+  function ymd(n) {
+    var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n);
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+           "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function plain(html, max) {
+    var t = document.createElement("div"); t.innerHTML = html || "";
+    var s = (t.textContent || "").replace(/\s+/g, " ").trim();
+    if (max && s.length > max) s = s.slice(0, max).replace(/[\s,.;:—-]+$/, "") + "…";
+    return s;
+  }
+  function hhmm(d) { return d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }); }
+
+  /* ——— скелетоны загрузки ———
+     Появляются не сразу: если ответ успел прийти за DELAY, их не будет вовсе.
+     А появившись, держатся минимум MIN — чтобы не мелькнуть и пропасть. */
+  var SK_DELAY = 160, SK_MIN = 450, skActive = {};
+  function skTypes(n) {
+    var h = "", i;
+    for (i = 0; i < n; i++)
+      h += '<div class="skrow"><span class="bars">' +
+           '<span class="bar sw" style="animation-delay:' + (-i * 90) + 'ms"></span>' +
+           '<span class="bar short sw" style="animation-delay:' + (-i * 90 - 60) + 'ms"></span>' +
+           "</span></div>";
+    return h;
+  }
+  function skTimes(n) {
+    var h = "", i;
+    for (i = 0; i < n; i++)
+      h += '<div class="skchip sw" style="animation-delay:' + (-i * 70) + 'ms"></div>';
+    return h;
+  }
+  function pending(box, html, minH) {
+    if (skActive[box.id]) skActive[box.id]();
+    var at = 0, dead = false;
+    var t = setTimeout(function () {
+      if (dead) return;
+      box.innerHTML = html;
+      at = Date.now();
+    }, SK_DELAY);
+    box.classList.add("pending");
+    box.style.setProperty("--sk-h", minH + "px");
+    skActive[box.id] = function () { dead = true; clearTimeout(t); };
+    return function (render) {
+      dead = true; clearTimeout(t);
+      delete skActive[box.id];
+      var go = function () {
+        box.classList.remove("pending");
+        box.style.removeProperty("--sk-h");
+        render();
+      };
+      var left = at ? SK_MIN - (Date.now() - at) : 0;
+      if (left > 0) setTimeout(go, left); else go();
+    };
+  }
+
+  /* ——— 1. услуги ——— */
+  show(1);
+  var doneTypes = pending(q("types"), skTypes(2), 126);
+
+  api("/rest/v2/event-types", V_TYPES)
+    .then(function (body) {
+      var raw = body.data || {};
+      var items = Array.isArray(raw) ? raw : Object.values(raw);
+      var list = [];
+      items.forEach(function (t) {
+        if (t && !t.hidden) {
+          list.push({
+            id: t.id, title: t.title, slug: t.slug,
+            description: t.description || "",
+            minutes: t.lengthInMinutes || t.length,
+            price: t.price || 0, currency: t.currency || "RUB"
+          });
+        }
+      });
+
+      var box = q("types");
+      if (!list.length) {
+        doneTypes(function () { speak("Открытых встреч пока нет."); box.innerHTML = ""; });
+        return;
+      }
+
+      doneTypes(function () {
+        // одна услуга — сразу к выбору даты, без лишнего экрана
+        if (list.length === 1) {
+          st.single = true;
+          var b2 = document.querySelector('.back[data-to="1"]');
+          if (b2) b2.style.display = "none";
+          pickType(list[0]);
+          return;
+        }
+        box.innerHTML = "";
+        list.forEach(function (t) {
+          var d = plain(t.description, 62);
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "pick";
+          b.innerHTML = "<span><b>" + esc(plain(t.title)) + "</b>" +
+                        (d ? "<small>" + esc(d) + "</small>" : "") + "</span>" +
+                        "<em>" + t.minutes + " мин</em>";
+          b.onclick = function () { pickType(t); };
+          box.appendChild(b);
+        });
+        speak("На что записываемся?");
+      });
+    })
+    .catch(function () {
+      doneTypes(function () {
+        speak("Не удаётся получить данные. Проверьте ключ и что адрес сайта добавлен в разрешённые у ключа в Планёрке.");
+        q("types").innerHTML = "";
+      });
+    });
+
+  function pickType(t) {
+    st.type = t; st.byDate = {};
+    speak("Смотрю, что свободно…");
+    show(2);
+    var wait = pending(q("ribbon"), "", 84);
+    api("/rest/v2/slots?eventTypeId=" + t.id + "&start=" + ymd(0) + "&end=" + ymd(HORIZON - 1) +
+        "&timeZone=" + encodeURIComponent(TZ), V_SLOTS)
+      .then(function (body) {
+        st.byDate = body.data || {};
+        wait(function () { renderRibbon(); speak("Когда вам удобно?"); });
+      })
+      .catch(function () {
+        wait(function () {
+          speak("Не удаётся получить расписание. Проверьте ключ и разрешённые адреса у ключа в Планёрке.");
+          oops();
+        });
+      });
+  }
+
+  /* ——— 2. дата ——— */
+  function renderRibbon() {
+    var box = q("ribbon");
+    box.innerHTML = "";
+    for (var i = 0; i < HORIZON; i++) {
+      (function (i) {
+        var key = ymd(i), dt = new Date(key + "T00:00:00");
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "day" + (key === st.date ? " on" : "") +
+                      (st.byDate[key] && !st.byDate[key].length ? " off" : "");
+        b.innerHTML = '<span class="wd">' + (i === 0 ? "сег" : WD[dt.getDay()]) + "</span>" +
+                      '<span class="n">' + dt.getDate() + "</span>" +
+                      '<span class="mo">' + MO[dt.getMonth()] + "</span>";
+        b.onclick = function () { pickDate(key); };
+        box.appendChild(b);
+      })(i);
+    }
+  }
+
+  function pickDate(d) {
+    st.date = d;
+    var dt = new Date(d + "T00:00:00");
+    renderRibbon();
+    show(3);
+    var slots = st.byDate[d] || [];
+    if (!slots.length) {
+      speak("В этот день пусто. Возьмём другой?");
+      lookAway();
+      q("times").innerHTML = '<p class="note" style="grid-column:1/-1">Свободного времени нет.</p>';
+      return;
+    }
+    speak(dt.getDate() + " " + MOF[dt.getMonth()] + ". Во сколько удобно?");
+    renderTimes(slots);
+  }
+
+  function renderTimes(slots) {
+    var box = q("times");
+    box.innerHTML = "";
+    slots.forEach(function (s) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "time";
+      b.textContent = hhmm(new Date(s.start));
+      b.onclick = function () { pickTime(s.start); };
+      box.appendChild(b);
+    });
+  }
+
+  /* ——— 3→4. время и контакты ——— */
+  function pickTime(iso) {
+    st.slot = iso;
+    var d = new Date(iso);
+    speak("<b>" + hhmm(d) + "</b>, " + d.getDate() + " " + MOF[d.getMonth()] + ". Как вас найти?");
+    show(4);
+  }
+
+  q("go").onclick = function () {
+    var name  = document.querySelector('input[name="name"]').value.trim();
+    var email = document.querySelector('input[name="email"]').value.trim();
+    var phone = document.querySelector('input[name="phone"]').value.trim();
+    var trap  = document.querySelector('input[name="trap"]').value;
+    var fine  = q("fine"), go = q("go");
+
+    if (!name) {
+      speak("А как к вам обращаться?");
+      oops(document.querySelector('input[name="name"]')); return;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      speak("Кажется, в почте опечатка.");
+      oops(document.querySelector('input[name="email"]')); return;
+    }
+
+    // невидимое поле-ловушка: его заполняет бот, человек — никогда
+    if (trap) { done(email); return; }
+
+    go.disabled = true; go.textContent = "Записываю…";
+    speak("Секунду, оформляю запись…");
+
+    api("/rest/v2/bookings", V_BOOK, {
+      method: "POST",
+      body: JSON.stringify({
+        eventTypeId: st.type.id,
+        start: st.slot,
+        attendee: { name: name, email: email, phoneNumber: phone || null, timeZone: TZ, language: "ru" }
+      })
+    })
+      .then(function () {
+        go.disabled = false; go.textContent = "Записаться";
+        done(email);
+      })
+      .catch(function (err) {
+        go.disabled = false; go.textContent = "Записаться";
+        if (err.httpStatus === 409) {
+          speak("Это время только что заняли. Выберем другое?");
+          oops();
+          show(3);
+          var again = pending(q("times"), skTimes(9), 155);
+          api("/rest/v2/slots?eventTypeId=" + st.type.id + "&start=" + st.date + "&end=" + st.date +
+              "&timeZone=" + encodeURIComponent(TZ), V_SLOTS)
+            .then(function (body) {
+              var fresh = (body.data && body.data[st.date]) || [];
+              st.byDate[st.date] = fresh;
+              again(function () { renderTimes(fresh); });
+            })
+            .catch(function () { again(function () { renderTimes([]); }); });
+          return;
+        }
+        speak("Не получилось записать. Попробуем ещё раз?");
+        oops(go);
+        fine.innerHTML = '<span class="badtext">Запись не прошла.</span>';
+      });
+  };
+
+  /* ——— 5. готово ——— */
+  function done(email) {
+    var d = new Date(st.slot);
+    speak("Готово! Письмо с подтверждением уже летит.");
+    q("recap").innerHTML =
+      '<div class="ticketline"><span>Встреча</span><b>' + esc(plain(st.type.title)) + "</b></div>" +
+      '<div class="ticketline"><span>Когда</span><b>' +
+        d.toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) +
+        ", " + hhmm(d) + "</b></div>" +
+      '<div class="ticketline"><span>Сколько</span><b>' + st.type.minutes + " минут</b></div>" +
+      '<div class="ticketline"><span>Написали на</span><b>' + esc(email) + "</b></div>";
+    show(5);
+  }
+
+})();
+</script>
+</body>
+</html>
