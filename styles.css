@@ -19,15 +19,15 @@ a.lnk:hover{color:var(--accent-hover);text-decoration:underline}
 .sec{padding-top:clamp(52px,6vw,84px)}
 .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
 .site-header{position:sticky;top:0;z-index:20;background:rgba(247,244,239,0.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.bar{max-width:1080px;margin:0 auto;padding:7px 24px;display:flex;align-items:center;gap:28px;flex-wrap:wrap}
-.brand{font-family:Lora,Georgia,serif;font-size:19px;letter-spacing:.01em;color:var(--ink);margin-right:auto}
+.bar{max-width:1080px;margin:0 auto;padding:4px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;line-height:1.15}
+.brand{font-family:Lora,Georgia,serif;font-size:16px;letter-spacing:.01em;color:var(--ink);margin-right:auto;line-height:1.15}
 .brand:hover{text-decoration:none}
-.nav{display:flex;align-items:center;gap:22px;flex-wrap:wrap;font-size:15px}
+.nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:14px;line-height:1.15}
 .nav-lnk{color:var(--muted2)}
 .nav-lnk:hover{color:var(--accent-ink);text-decoration:none}
 .cta{background:var(--accent);color:#fff;padding:15px 28px;border-radius:999px;font-weight:600;font-size:16px;display:inline-block}
 .cta:hover{background:var(--accent-hover);color:#fff;text-decoration:none}
-.cta-sm{padding:7px 16px;font-weight:500;font-size:14px}
+.cta-sm{padding:5px 14px;font-weight:500;font-size:13px;line-height:1.15}
 .hero{background:linear-gradient(180deg,var(--sky) 0%,var(--bg) 100%)}
 .hero-inner{max-width:1080px;margin:0 auto;padding:clamp(48px,6vw,76px) 24px clamp(52px,6vw,84px);display:flex;flex-wrap:wrap;gap:clamp(32px,4vw,56px);align-items:center}
 .hero-copy{flex:1 1 340px;min-width:0}
