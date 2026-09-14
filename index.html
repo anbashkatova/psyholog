@@ -145,14 +145,26 @@
   </footer>
 </div>
 <script>
-// Подгоняем высоту окна записи под содержимое формы (сообщения шлёт zapis.html)
-window.addEventListener("message", function (e) {
-  var d = e.data;
-  if (d && d.__planerka && typeof d.height === "number") {
-    var f = document.querySelector(".planerka-frame");
-    if (f) f.style.height = (d.height + 2) + "px";
+// Подгоняем высоту окна записи точно под содержимое формы — без пустоты снизу.
+(function () {
+  var frame = document.querySelector(".planerka-frame");
+  if (!frame) return;
+  function fit(h) { if (h && h > 40) frame.style.height = (h + 2) + "px"; }
+  // способ 1 — форма сама сообщает свою высоту
+  window.addEventListener("message", function (e) {
+    var d = e.data;
+    if (d && d.__planerka && typeof d.height === "number") fit(d.height);
+  });
+  // способ 2 (запасной, тот же домен) — читаем высоту формы напрямую
+  function poll() {
+    try {
+      var doc = frame.contentWindow && frame.contentWindow.document;
+      if (doc && doc.body) fit(doc.body.scrollHeight);
+    } catch (e) {}
   }
-});
+  frame.addEventListener("load", function () { poll(); setInterval(poll, 400); });
+  setInterval(poll, 400);
+})();
 </script>
 <script src="app.js" defer></script>
 </body>
