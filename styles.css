@@ -129,3 +129,12 @@ a.lnk:hover{color:var(--accent-hover);text-decoration:underline}
 .foot-legal{max-width:22em}
 .muted{color:oklch(0.62 0.02 250);font-size:12px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* мобильная шапка: строка 1 — имя, строка 2 — всё меню вместе с кнопкой */
+@media (max-width:640px){
+  .bar{padding:5px 14px;gap:6px 10px}
+  .brand{flex-basis:100%;margin-right:0}
+  .nav{flex-basis:100%;flex-wrap:nowrap;gap:10px;font-size:13px}
+  .nav-lnk{white-space:nowrap}
+  .cta-sm{padding:5px 11px;font-size:12px;white-space:nowrap}
+}
