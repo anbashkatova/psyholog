@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://anbashkatova.github.io/psyholog/sitemap.xml
+Sitemap: https://buranova-psyholog.ru/sitemap.xml
